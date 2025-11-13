@@ -1,9 +1,8 @@
-
 class Movie{
-    constructor(title, genre, duration, capacity, ticketPrice, lastShowDate) {
+    constructor(title, genre,duration, capacity, ticketPrice, lastShowDate) {
         this.title = title
         this.genre = genre
-        this.id = this.title.slice(0, 3).toUpperCase()
+        this.id = this.title.slice(0,3).toUpperCase()
         this.duration = duration
         this.capacity = capacity
         this.ticketPrice = ticketPrice
@@ -14,41 +13,41 @@ class Movie{
     toString(){
         return `Movie ${this.id} titled "${this.title}" with a duration of ${this.duration} minutes, a capacity of ${this.capacity} seats, and a ticket price of ${this.ticketPrice} $.`
     }
+
 }
 
 class InternationalMovie extends Movie{
-    constructor(title, genre, duration, capacity, ticketPrice, lastShowDate, requiresSubtitles, isRestricted) {
-        super(title, genre, duration, capacity, ticketPrice, lastShowDate);
-        this.isRestricted = isRestricted
+    constructor(title, genre,duration, capacity, ticketPrice, lastShowDate, requiresSubtitles, isRestricted) {
+        super(title, genre,duration, capacity, ticketPrice, lastShowDate);
         this.requiresSubtitles = requiresSubtitles
+        this.isRestricted = isRestricted
     }
 
     getRestrictionLevel(){
-        if(!this.requiresSubtitles){
-            if(this.capacity > 100){
-                return 'Moderate'
-            }
-
-            if(this.duration > 150){
-                return 'Low'
-            }
-
-            return 'Very Low'
-        }
-        else{
+        if(this.requiresSubtitles){
             if(this.isRestricted)
                 return 'Very High'
 
-            if(this.capacity > 100){
+            if (this.capacity > 100)
                 return 'High'
-            }
+
             return 'Moderate'
+        }
+        else{
+            if(this.capacity > 100)
+                return 'Moderate'
+
+            if(this.duration > 150)
+                return 'Low'
+
+            return 'Very Low'
         }
     }
 
     toString(){
-        return `Movie ${this.id} titled "${this.title}" is an international movie which ${this.requiresSubtitles ? "requires" : "doesn't require"} subtitles and ${this.isRestricted ? 'is' : "isn't"} restricted.`
+        return `Movie ${this.id} titled "${this.title}" is an international movie which ${this.requiresSubtitles ? "requires" : "doesn't require"} subtitles and ${this.isRestricted ? "is" : "isn't"} restricted.`
     }
+
 }
 
 class MovieTheater{
@@ -61,37 +60,40 @@ class MovieTheater{
     }
 
     updateMovies(){
-        let basicMovies = this.movies.filter(movie => movie instanceof Movie)
-        let internationalMovies = this.movies.filter(movie => movie instanceof InternationalMovie)
-
         let currentDate = new Date()
-        basicMovies.forEach(movie => {
-            if((currentDate - movie.lastShowDate) / (1000*60*60*24) > 7){
-                movie.isActive = false
-            }
-        })
 
-        internationalMovies.forEach(movie => {
-            if((currentDate - movie.lastShowDate) / (1000*60*60*24) > 28){
-                movie.isActive = false
-                console.log(`International ${movie.id} has a ${movie.getRestrictionLevel()} restriction level.`)
+        this.movies.forEach(movie => {
+            if(movie instanceof InternationalMovie){
+                if((currentDate - movie.lastShowDate) / (1000 * 60 * 60 * 24 ) > 28){
+                    movie.isActive = false
+                    console.log(`International ${movie.id} has a ${movie.getRestrictionLevel()} restriction level.`)
+                }
+            }
+            else{
+                if((currentDate - movie.lastShowDate) / (1000 * 60 * 60 * 24 ) > 7){
+                    movie.isActive = false
+                }
             }
         })
     }
 
-    internationalPercentage(genre) {
-        const activeMovies = this.movies.filter(movie => movie.isActive && movie.genre.toLowerCase() === genre.toLowerCase());
-        const activeInternationalMovies = activeMovies.filter(movie => movie instanceof InternationalMovie);
+    internationalPercentage(genre){
+        let activeInternationalMoviesInGenre = this.movies
+            .filter(movie => movie instanceof InternationalMovie && movie.genre == genre && movie.isActive == true)
 
-        if (activeMovies.length === 0) return 0;
+        let activeMoviesInGenre = this.movies
+            .filter(movie => movie.genre == genre && movie.isActive == true)
 
-        return (activeInternationalMovies.length / activeMovies.length) * 100;
+        if(activeMoviesInGenre.length == 0)
+            return 0
+
+        return (activeInternationalMoviesInGenre.length / activeMoviesInGenre.length) * 100
     }
-
 
     printMovies(){
         this.movies
             .sort((a, b) => b.duration - a.duration)
-            .forEach(movie => console.log(movie.toString()));
+            .forEach(movie => console.log(movie.toString()))
     }
+
 }
